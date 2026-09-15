@@ -8,7 +8,7 @@ It supports text, image, and video input through a local CLI or OpenAI-/Anthropi
 
 > **Fork notes** — this fork targets a real single-card deployment and adds:
 > - `perf(sm70)`: accelerated sm_70 vision encoding (upstream `Neroued/ninfer`).
-> - **[`deploy-v100/`](deploy-v100/README.md)** — end-to-end deployment of Qwen3.8-27B (abliterated) on a Tesla V100-SXM2-32GB: build/convert scripts, systemd unit, `wait-gpu` boot gate, `gpu-mode` VRAM switching, and a cross-engine benchmark (NInfer vs llama.cpp) with measured results.
+> - **[`deploy-v100/`](deploy-v100/README.md)** — end-to-end deployment of Qwen3.8-27B (abliterated) on a Tesla V100-SXM2-32GB: build/convert scripts, systemd unit, `wait-gpu` boot gate, `gpu-mode` VRAM switching, and a cross-engine benchmark (NInfer vs llama.cpp) with measured results. Includes a same-methodology re-run of the engine benchmark below, on SXM2 with a self-converted `nvfp4` artifact.
 
 ## Models
 

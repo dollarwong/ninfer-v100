@@ -1,0 +1,123 @@
+### artifact: /home/dale/models/ninfer/qwen3_8_27b_abliterated_nvfp4.ninfer
+Tesla V100-SXM2-32GB, 387 MiB, 32768 MiB
+
+===== PREFILL 单独 pp2048 (int8 KV) =====
+[ninfer_bench] loading /home/dale/models/ninfer/current.ninfer (max_context=8192, kv_cache=int8-group64)
+[ninfer_bench] test 1/1 pp2048: warmup=1 reps=3
+ninfer_bench product throughput report
+  target:     qwen3_8_27b
+  weights:    nvfp4
+  gpu:        Tesla V100-SXM2-32GB (device 0)
+  cuda:       runtime 12.8, driver 13.0
+  artifact:   /home/dale/models/ninfer/current.ninfer (23719496192 bytes)
+  load:       11.882 s, upload 6.10381 s, read 18.99 GiB, H2D 18.98 GiB, staging peak 256.0 MiB
+  memory:     weights 18.98 GiB, sequence 569.6 MiB, workspace 472.0 MiB, Vision handoff disabled (within workspace), graph allowance 12.0 MiB, KV payload 264.0 MiB
+  corpus:     bench/fixtures/bench_corpus.ids (65536 tokens)
+  config:     max_context=8192 prefill_chunk=1024 kv_cache=int8-group64 spec=none draft_k=0 proposal_head=full decode_path=cuda_graph graph_prime=n/a repetitions=3 warmup=1
+
+test    n_prompt  n_gen      prefill t/s  decode out t/s  decode eng t/s  spec acc  spec round/fb  work peak
+pp2048      2048      0  1167.48 ± 1.17               -               -       n/a            n/a  472.0 MiB
+
+===== DECODE pp2048+tg256  MTP K=1  (int8 KV, lm-head-draft) =====
+[ninfer_bench] loading /home/dale/models/ninfer/current.ninfer (max_context=8192, kv_cache=int8-group64)
+[ninfer_bench] test 1/1 pp2048+tg256: warmup=1 reps=3
+ninfer_bench product throughput report
+  target:     qwen3_8_27b
+  weights:    nvfp4
+  gpu:        Tesla V100-SXM2-32GB (device 0)
+  cuda:       runtime 12.8, driver 13.0
+  artifact:   /home/dale/models/ninfer/current.ninfer (23719496192 bytes)
+  load:       12.3888 s, upload 6.34415 s, read 19.74 GiB, H2D 19.73 GiB, staging peak 256.0 MiB
+  memory:     weights 19.73 GiB, sequence 626.2 MiB, workspace 472.0 MiB, Vision handoff disabled (within workspace), graph allowance 164.0 MiB, KV payload 280.5 MiB
+  corpus:     bench/fixtures/bench_corpus.ids (65536 tokens)
+  config:     max_context=8192 prefill_chunk=1024 kv_cache=int8-group64 spec=mtp draft_k=1 proposal_head=optimized decode_path=mtp_cuda_graph graph_prime=5 outputs repetitions=3 warmup=1
+
+test          n_prompt  n_gen      prefill t/s  decode out t/s  decode eng t/s      spec acc  spec round/fb  work peak
+pp2048+tg256      2048    256  1150.58 ± 2.12  236.62 ± 0.07  236.62 ± 0.07  0.9916666667           54/0  472.0 MiB
+
+===== DECODE pp2048+tg256  MTP K=2  (int8 KV, lm-head-draft) =====
+[ninfer_bench] loading /home/dale/models/ninfer/current.ninfer (max_context=8192, kv_cache=int8-group64)
+[ninfer_bench] test 1/1 pp2048+tg256: warmup=1 reps=3
+ninfer_bench product throughput report
+  target:     qwen3_8_27b
+  weights:    nvfp4
+  gpu:        Tesla V100-SXM2-32GB (device 0)
+  cuda:       runtime 12.8, driver 13.0
+  artifact:   /home/dale/models/ninfer/current.ninfer (23719496192 bytes)
+  load:       11.9478 s, upload 6.34422 s, read 19.74 GiB, H2D 19.73 GiB, staging peak 256.0 MiB
+  memory:     weights 19.73 GiB, sequence 628.5 MiB, workspace 472.0 MiB, Vision handoff disabled (within workspace), graph allowance 164.0 MiB, KV payload 280.6 MiB
+  corpus:     bench/fixtures/bench_corpus.ids (65536 tokens)
+  config:     max_context=8192 prefill_chunk=1024 kv_cache=int8-group64 spec=mtp draft_k=2 proposal_head=optimized decode_path=mtp_cuda_graph graph_prime=7 outputs repetitions=3 warmup=1
+
+test          n_prompt  n_gen      prefill t/s  decode out t/s  decode eng t/s      spec acc  spec round/fb  work peak
+pp2048+tg256      2048    256  1143.79 ± 1.31  235.71 ± 0.32  235.71 ± 0.32  0.9916666667           54/0  472.0 MiB
+
+===== DECODE pp2048+tg256  MTP K=3  (int8 KV, lm-head-draft) =====
+[ninfer_bench] loading /home/dale/models/ninfer/current.ninfer (max_context=8192, kv_cache=int8-group64)
+[ninfer_bench] test 1/1 pp2048+tg256: warmup=1 reps=3
+ninfer_bench product throughput report
+  target:     qwen3_8_27b
+  weights:    nvfp4
+  gpu:        Tesla V100-SXM2-32GB (device 0)
+  cuda:       runtime 12.8, driver 13.0
+  artifact:   /home/dale/models/ninfer/current.ninfer (23719496192 bytes)
+  load:       11.9061 s, upload 6.34394 s, read 19.74 GiB, H2D 19.73 GiB, staging peak 256.0 MiB
+  memory:     weights 19.73 GiB, sequence 630.7 MiB, workspace 472.0 MiB, Vision handoff disabled (within workspace), graph allowance 164.0 MiB, KV payload 280.6 MiB
+  corpus:     bench/fixtures/bench_corpus.ids (65536 tokens)
+  config:     max_context=8192 prefill_chunk=1024 kv_cache=int8-group64 spec=mtp draft_k=3 proposal_head=optimized decode_path=mtp_cuda_graph graph_prime=9 outputs repetitions=3 warmup=1
+
+test          n_prompt  n_gen      prefill t/s  decode out t/s  decode eng t/s      spec acc  spec round/fb  work peak
+pp2048+tg256      2048    256  1139.65 ± 1.78  235.03 ± 0.06  235.03 ± 0.06  0.9916666667           54/0  472.0 MiB
+
+===== DECODE pp2048+tg256  MTP K=4  (int8 KV, lm-head-draft) =====
+[ninfer_bench] loading /home/dale/models/ninfer/current.ninfer (max_context=8192, kv_cache=int8-group64)
+[ninfer_bench] test 1/1 pp2048+tg256: warmup=1 reps=3
+ninfer_bench product throughput report
+  target:     qwen3_8_27b
+  weights:    nvfp4
+  gpu:        Tesla V100-SXM2-32GB (device 0)
+  cuda:       runtime 12.8, driver 13.0
+  artifact:   /home/dale/models/ninfer/current.ninfer (23719496192 bytes)
+  load:       11.8859 s, upload 6.34432 s, read 19.74 GiB, H2D 19.73 GiB, staging peak 256.0 MiB
+  memory:     weights 19.73 GiB, sequence 632.9 MiB, workspace 472.0 MiB, Vision handoff disabled (within workspace), graph allowance 164.0 MiB, KV payload 280.6 MiB
+  corpus:     bench/fixtures/bench_corpus.ids (65536 tokens)
+  config:     max_context=8192 prefill_chunk=1024 kv_cache=int8-group64 spec=mtp draft_k=4 proposal_head=optimized decode_path=mtp_cuda_graph graph_prime=11 outputs repetitions=3 warmup=1
+
+test          n_prompt  n_gen      prefill t/s  decode out t/s  decode eng t/s      spec acc  spec round/fb  work peak
+pp2048+tg256      2048    256  1135.92 ± 2.22  233.26 ± 0.61  233.26 ± 0.61  0.9916666667           54/0  472.0 MiB
+
+===== DECODE pp2048+tg256  MTP K=5  (int8 KV, lm-head-draft) =====
+[ninfer_bench] loading /home/dale/models/ninfer/current.ninfer (max_context=8192, kv_cache=int8-group64)
+[ninfer_bench] test 1/1 pp2048+tg256: warmup=1 reps=3
+ninfer_bench product throughput report
+  target:     qwen3_8_27b
+  weights:    nvfp4
+  gpu:        Tesla V100-SXM2-32GB (device 0)
+  cuda:       runtime 12.8, driver 13.0
+  artifact:   /home/dale/models/ninfer/current.ninfer (23719496192 bytes)
+  load:       11.8777 s, upload 6.33763 s, read 19.74 GiB, H2D 19.73 GiB, staging peak 256.0 MiB
+  memory:     weights 19.73 GiB, sequence 635.1 MiB, workspace 472.0 MiB, Vision handoff disabled (within workspace), graph allowance 164.0 MiB, KV payload 280.6 MiB
+  corpus:     bench/fixtures/bench_corpus.ids (65536 tokens)
+  config:     max_context=8192 prefill_chunk=1024 kv_cache=int8-group64 spec=mtp draft_k=5 proposal_head=optimized decode_path=mtp_cuda_graph graph_prime=13 outputs repetitions=3 warmup=1
+
+test          n_prompt  n_gen      prefill t/s  decode out t/s  decode eng t/s      spec acc  spec round/fb  work peak
+pp2048+tg256      2048    256  1130.64 ± 1.88  231.93 ± 0.21  231.93 ± 0.21  0.9916666667           54/0  472.0 MiB
+
+===== 参考：decode 无投机 pp2048+tg256 =====
+[ninfer_bench] loading /home/dale/models/ninfer/current.ninfer (max_context=8192, kv_cache=int8-group64)
+[ninfer_bench] test 1/1 pp2048+tg256: warmup=1 reps=3
+ninfer_bench product throughput report
+  target:     qwen3_8_27b
+  weights:    nvfp4
+  gpu:        Tesla V100-SXM2-32GB (device 0)
+  cuda:       runtime 12.8, driver 13.0
+  artifact:   /home/dale/models/ninfer/current.ninfer (23719496192 bytes)
+  load:       11.5144 s, upload 6.10257 s, read 18.99 GiB, H2D 18.98 GiB, staging peak 256.0 MiB
+  memory:     weights 18.98 GiB, sequence 569.6 MiB, workspace 472.0 MiB, Vision handoff disabled (within workspace), graph allowance 12.0 MiB, KV payload 264.0 MiB
+  corpus:     bench/fixtures/bench_corpus.ids (65536 tokens)
+  config:     max_context=8192 prefill_chunk=1024 kv_cache=int8-group64 spec=none draft_k=0 proposal_head=full decode_path=cuda_graph graph_prime=3 outputs repetitions=3 warmup=1
+
+test          n_prompt  n_gen      prefill t/s  decode out t/s  decode eng t/s  spec acc  spec round/fb  work peak
+pp2048+tg256      2048    256  1141.45 ± 4.00   30.66 ± 0.19   30.66 ± 0.19       n/a            n/a  472.0 MiB
+
+全部完成

@@ -45,6 +45,36 @@
 - `tok/s（客户端）` 含端到端 wall 时间（短输出时 TTFT 占比大，数字偏低属正常）。
 - 原始数据：`bench/results/ninfer.json`、`bench/results/llama.json`；复算表 `bench/summary.py`。
 
+## 与上游官方基准的同口径对比
+
+上面的数字是**真实 HTTP 服务端到端**吞吐，不能与上游 README 的引擎基准表直接比较
+（后者是短上下文、CUDA Graph、优化 proposal head 的纯引擎吞吐）。这一节用**与上游完全相同的口径**
+重跑一遍：prefill 单独 `pp2048`；decode `pp2048+tg256`；CUDA Graph；优化 proposal head；
+INT8 group-64 KV；丢 1 次 warmup + 3 次实测。
+
+上游表在 **V100-PCIe-32GB** 上测得，本机是 **V100-SXM2-32GB**。上游 README 注明同代 SXM2
+约快 7%，可作为基准线。
+
+**decode tok/s（pp2048 → tg256）**
+
+| K | 上游（PCIe，官方 nvfp4） | 本机（SXM2，自转 abliterated nvfp4） | 差异 |
+|---:|---:|---:|---:|
+| 1 | 218.98 | **236.62** | +8.1% |
+| 3 | 209.24 | **235.03** | +12.3% |
+| 4 | 204.02 | **233.26** | +14.3% |
+| 5 | 199.58 | **231.93** | +16.2% |
+
+**prefill tok/s**：单独 `pp2048` 本机 **1167.48**，上游同档约 1102.5（+5.9%）。
+
+**MTP 接受率**：K=1 时两边持平（99.2% vs 99.17%）；K=5 时上游降到 97.1%，本机仍为 **99.17%**
+——这是本机 K 增大后领先幅度变大的主因（K 从 1→5 上游掉 8.9%，本机只掉 2.0%）。
+
+**无投机对照**：本机 `pp2048+tg256` 关掉投机仅 **30.66 tok/s**，即 MTP 带来约 **7.7×** 提速。
+
+> 口径提醒：本机跑的是**自转 abliterated nvfp4**，与上游官方 nvfp4 制品**权重不同**（同架构、同量化方案）。
+> 因此上表的差值混合了「SXM2 硬件优势」与「接受率曲线更平」两个因素，不能全部归因于硬件。
+> 原始输出：`bench/results/nvfp4-official-sweep.txt`；复现脚本：`scripts/official-sweep.sh`。
+
 ## 模型：两条自转换路线
 
 权重不入库，源 checkpoint 自选（hf 拉取的 abliterated bf16）。两条路线都能出 `.ninfer` 制品：
@@ -72,6 +102,7 @@ deploy-v100/
 │   ├── quantize-nvfp4-manual.py # 手写分片量化（显存友好）
 │   ├── k-sweep.sh            # MTP --draft-tokens K 值扫描
 │   ├── bench-v100.sh         # 官方口径基准（prefill / decode / no-spec 对照）
+│   ├── official-sweep.sh     # 官方口径 MTP K=1..5 扫描（对上游表用）
 │   ├── ninfer-serve.service  # systemd --user 单元（已脱敏为模板）
 │   ├── wait-gpu.sh           # 启动前 GPU 驱动就绪探测（防 CPU 回退）
 │   └── gpu-mode              # LLM / llama / ComfyUI 显存切换
@@ -79,7 +110,7 @@ deploy-v100/
     ├── bench_matrix.py       # 跨引擎对比矩阵（短/中/长/超长 + TTFT）
     ├── mkcorpus.py           # 生成本地测试语料
     ├── summary.py            # 汇总两引擎结果为对比表
-    └── results/              # 实测 JSON（ninfer.json / llama.json）
+    └── results/              # 实测数据（ninfer.json / llama.json / nvfp4-official-sweep.txt）
 ```
 
 ## 部署步骤
@@ -147,6 +178,7 @@ gpu-mode status   # 服务 + 显存总览
 
 ```bash
 ./scripts/bench-v100.sh                # 官方口径（需先腾显存：停 llama-server）
+./scripts/official-sweep.sh            # 官方口径 MTP K=1..5 扫描，对上游 README 表用
 # 跨引擎对比：
 BENCH_TAG=ninfer python3 bench/bench_matrix.py   # ninfer
 # 切到 llama-server 后：
@@ -154,4 +186,6 @@ BENCH_TAG=llama python3 bench/bench_matrix.py
 python3 bench/summary.py                  # 出对比表
 ```
 
-> 磊哥偏好：性能实测先清场——停掉争抢资源的任务（如死循环 dsh）再测，不接受被干扰的数字。
+> 测性能前先清场：停掉争抢 GPU / 内存的任务，避免测到被干扰的数字。
+> 跑引擎基准时须先 `systemctl --user stop ninfer-serve`——基准要独占显存，且
+> `ninfer-serve` 未开 `SO_REUSEADDR`，跑完记得等 8080 真正空闲再起服务。
