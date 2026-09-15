@@ -1,0 +1,50 @@
+[
+ {
+  "case": "short_ttft#1",
+  "ttft_ms": 299
+ },
+ {
+  "case": "short_ttft#2",
+  "ttft_ms": 120
+ },
+ {
+  "case": "short_ttft#3",
+  "ttft_ms": 125
+ },
+ {
+  "case": "short_decode",
+  "prompt_tokens": 19,
+  "completion_tokens": 28,
+  "wall_s": 0.47,
+  "tok_s": 60.14,
+  "srv_prefill": 59.3,
+  "srv_decode": 78.3
+ },
+ {
+  "case": "mid",
+  "prompt_tokens": 9989,
+  "completion_tokens": 82,
+  "wall_s": 10.09,
+  "tok_s": 8.13,
+  "srv_prefill": 1137.5,
+  "srv_decode": 62.2
+ },
+ {
+  "case": "long",
+  "prompt_tokens": 89734,
+  "completion_tokens": 94,
+  "wall_s": 138.53,
+  "tok_s": 0.68,
+  "srv_prefill": 657.9,
+  "srv_decode": 44.2
+ },
+ {
+  "case": "xl",
+  "prompt_tokens": 122658,
+  "completion_tokens": 101,
+  "wall_s": 232.73,
+  "tok_s": 0.43,
+  "srv_prefill": 534.3,
+  "srv_decode": 32.4
+ }
+]

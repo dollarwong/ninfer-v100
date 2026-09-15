@@ -1,0 +1,27 @@
+# /home/dale/.config/systemd/user/ninfer-serve.service
+[Unit]
+Description=NInfer sm_70 server - Qwen3.8-27B (artifact via current.ninfer symlink) + Vision (Tesla V100)
+After=network.target
+
+[Service]
+Type=simple
+Environment=PATH=/home/dale/.hermes/bin:/home/dale/.local/bin:/usr/local/bin:/usr/bin:/bin
+# Block until the GPU driver is ready; exit 1 otherwise so Restart=on-failure retries.
+ExecStartPre=/home/dale/.hermes/scripts/wait-gpu.sh
+ExecStart=/home/dale/repos/ninfer-v100/build-v100/apps/ninfer-serve \
+  /home/dale/models/ninfer/current.ninfer \
+  --host 127.0.0.1 --port 8080 \
+  --model-id qwen3.8-27b \
+  --max-context 131072 \
+  --kv-capacity auto \
+  --prefill-chunk 2048 \
+  --kv-dtype int8 \
+  --spec mtp --draft-tokens 3 --lm-head-draft \
+  --preserve-thinking \
+  --vision \
+  --max-concurrency 1
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=default.target

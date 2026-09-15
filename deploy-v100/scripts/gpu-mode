@@ -1,0 +1,78 @@
+#!/usr/bin/env bash
+# gpu-mode — 在 Tesla V100 (32GB) 上切换本地大模型 / ComfyUI 跑图（互斥，共享显存）
+#
+#   gpu-mode llm     → 起 NInfer（Qwen3.8-27B NVFP4，8080）—— 现役主力
+#   gpu-mode llama   → 回退起旧 llama.cpp（Qwen3.8-27B-Uncensored GGUF，8080）
+#   gpu-mode comfy   → 停本地 LLM，起 ComfyUI 绘图/视频（8188）
+#   gpu-mode status  → 看各服务与显存
+#
+# 注意：ninfer-serve 没有 SO_REUSEADDR，llama-server 刚停时 8080 会残留占用，
+#       直接 start 会 "cannot bind 127.0.0.1:8080"。下面用 bind 探测等到真能绑定再起。
+set -euo pipefail
+
+PORT=8080
+cmd="${1:-status}"
+
+port_free() {
+  python3 -c "import socket,sys
+s=socket.socket()
+try:
+    s.bind(('127.0.0.1',$PORT))
+except OSError:
+    sys.exit(1)
+finally:
+    s.close()" 2>/dev/null
+}
+
+wait_port() {
+  for _ in $(seq 1 30); do
+    port_free && return 0
+    sleep 4
+  done
+  echo "   ⚠️ 端口 $PORT 等待超时，仍然尝试启动"
+  return 0
+}
+
+wait_ready() {
+  for _ in $(seq 1 60); do
+    curl -s -m 3 "http://127.0.0.1:$PORT/v1/models" 2>/dev/null | grep -q '"id"' && return 0
+    sleep 2
+  done
+  return 1
+}
+
+case "$cmd" in
+  llm|qwen|ninfer)
+    echo ">> 停 ComfyUI 与旧 llama.cpp，起 ninfer（Qwen3.8-27B，制品见 current.ninfer 软链）"
+    systemctl --user stop comfyui llama-server 2>/dev/null || true
+    wait_port
+    systemctl --user start ninfer-serve
+    if wait_ready; then echo "   ninfer-serve: 就绪"; else echo "   ⚠️ ninfer-serve 未就绪，看 journalctl --user -u ninfer-serve"; fi
+    ;;
+  llama|old|legacy)
+    echo ">> 停 ComfyUI 与 ninfer，回退起旧 llama.cpp（Uncensored GGUF，8080）"
+    systemctl --user stop comfyui ninfer-serve 2>/dev/null || true
+    wait_port
+    systemctl --user start llama-server
+    if wait_ready; then echo "   llama-server: 就绪"; else echo "   ⚠️ llama-server 未就绪"; fi
+    ;;
+  comfy|image|video)
+    echo ">> 停本地 LLM（ninfer + llama.cpp），起 ComfyUI"
+    systemctl --user stop ninfer-serve llama-server 2>/dev/null || true
+    systemctl --user start comfyui
+    sleep 3
+    systemctl --user is-active comfyui | sed 's/^/   comfyui: /'
+    ;;
+  status)
+    printf "%-18s %-10s %s\n" "服务" "自启" "运行"
+    for s in ninfer-serve llama-server comfyui bge-m3-embed qdrant-server; do
+      en=$(systemctl --user is-enabled "$s" 2>/dev/null | head -1 || true); [ -z "$en" ] && en='-'
+      ac=$(systemctl --user is-active "$s" 2>/dev/null | head -1 || true); [ -z "$ac" ] && ac='-'
+      printf "%-18s %-10s %s\n" "$s" "$en" "$ac"
+    done
+    echo "--- V100 显存 ---"
+    nvidia-smi --query-gpu=name,memory.total,memory.used,memory.free --format=csv,noheader
+    ;;
+  *)
+    echo "用法: gpu-mode {llm|llama|comfy|status}"; exit 1;;
+esac
